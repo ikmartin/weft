@@ -386,6 +386,11 @@ def test_the_plan_follows_references_within_the_subjects_and_orders_by_depth_the
     records = load_all(settings.works_dir)
     assert records["doi:10.1/x"].reached_from == ["doi:10.1/a", "doi:10.1/b"]
     assert records["arxiv:2101.00009"].arxiv_category == "math.AG"  # no MSC code, kept by its category
+    # the same answer carries the version arXiv would serve, and that is the artifact a source download produces
+    zeta = records["arxiv:2101.00009"]
+    assert zeta.arxiv_version == "v3"
+    version = zeta.version_for("source")
+    assert (version.id, version.local) == ("arxiv:2101.00009v3", "v3")
     assert records["doi:10.1/p"].downloadable == "pdf" and records["doi:10.1/p"].reached_by == "index"
     assert records["doi:10.1/a"].citekeys == ["A20"] and records["doi:10.1/a"].home == "doi/10.1_a"
     assert not any("deep" in k for k in records)  # depth 2 stops there
