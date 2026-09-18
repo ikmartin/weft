@@ -58,7 +58,7 @@ def test_what_uses_a_result_and_what_a_work_holds(library: Settings) -> None:
 
     work = _query(library, query.neighbourhood, "arxiv:2401.00001")
     assert work["found"] and len(work["versions"]) == 2
-    assert "doi:10.4171/synth.0003" in work["cites"]
+    assert work["cites"] == ["arxiv:2401.00002", "doi:10.4171/synth.0003"], "what a work cites is other works, named as works, and never itself"
     assert work["references"], "a work's bibliography is part of its neighbourhood"
 
     versions = _query(library, query.versions, "arxiv:2401.00001")

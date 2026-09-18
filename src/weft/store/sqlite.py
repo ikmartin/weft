@@ -327,6 +327,10 @@ class SqliteStore:
             rows = self._conn.execute("SELECT * FROM works WHERE depth = ? ORDER BY key", (depth,)).fetchall()
         return iter([_work(r) for r in rows])
 
+    def version(self, ident: str) -> Version | None:
+        row = self._conn.execute("SELECT * FROM versions WHERE id = ?", (ident,)).fetchone()
+        return _version(row) if row is not None else None
+
     def versions_of(self, work: str) -> Iterator[Version]:
         found = self.work(work)
         key = found.key if found is not None else work

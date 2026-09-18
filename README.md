@@ -25,6 +25,15 @@ weft mcp                                              # the same payloads as MCP
 
 For an agent, register the corpus as an MCP server — in Claude Code, `claude mcp add weft -- weft mcp --corpus /path/to/corpus`. The tools are `search_works`, `get_result`, `closure`, `dependents`, `work`, `versions`, `bib` and `counts`; all read-only, all local, and `closure` with `text` answers *what does this theorem depend on, and where is each dependency stated* in one call.
 
+## The view
+
+```
+weft serve                 # in the corpus
+cd view && npm install && npm run dev
+```
+
+A SvelteKit single-page app over the same HTTP API: search, a work with its versions and what it cites, and a result with its statement, its proof, what uses it, and a graph of what it rests on. A citation inside a statement is a link wherever the linker resolved it, and the text the paper printed wherever it did not. The corpus is queried, never published whole, and `?api=` points the view at a corpus serving somewhere other than the default.
+
 ## Development
 
 ```
@@ -32,5 +41,7 @@ uv sync
 uv run pytest
 uv run ruff check src tests && uv run mypy
 ```
+
+The view has its own checks: `npm run check` (types), `npm run test` (units) and `npm run test:e2e`, which builds the app, serves `demos/synthetic` with `weft serve`, and reads it in a browser.
 
 No test touches the network: service clients take a transport, and recorded answers stand in. `demos/synthetic/` is a small fabricated corpus the tests use; crawled corpora under `demos/` are gitignored, because they hold other people's papers.

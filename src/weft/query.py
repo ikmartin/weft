@@ -130,10 +130,16 @@ def neighbourhood(store: Store, work_key: str) -> dict[str, Any]:
         return {"key": work_key, "found": False}
     versions = list(store.versions_of(work.key))
     results = [r for v in versions for r in store.results_of(v.id)]
+    mine = {v.id for v in versions}
     cites: set[str] = set()
     for result in results:
         for edge in store.edges_from(str(result.key)):
-            cites.add(edge.to if "#" not in edge.to else edge.to.partition("#")[0])
+            # an edge names a result of a version, or a whole work; either way what a reader wants here is the work, and this work's own results are not something it cites
+            target = edge.to.partition("#")[0] if "#" in edge.to else edge.to
+            if target in mine:
+                continue
+            found = store.version(target)
+            cites.add(found.work if found is not None and found.work else target)
     return {
         "found": True,
         "work": _work_payload(work),

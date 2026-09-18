@@ -90,6 +90,21 @@ def make_server(settings: Settings, host: str = "127.0.0.1", port: int = 8791) -
         def log_message(self, fmt: str, *args: object) -> None:  # noqa: A002 - the base class names it so
             return  # a query is not news; the CLI says what it started
 
+        def do_OPTIONS(self) -> None:  # noqa: N802 - the base class names it so
+            self.send_response(204)
+            self._cors()
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
+        def _cors(self) -> None:
+            """A read-only server on the loopback interface, so a view served from a dev server may ask it.
+
+            There is nothing to protect: every route answers the same to everyone who can already reach the port, and no route writes. A stricter rule would only mean configuring an allowed origin for a tool that is local by construction.
+            """
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type")
+
         def do_GET(self) -> None:  # noqa: N802 - the base class names it so
             parsed = urllib.parse.urlsplit(self.path)
             handler = ROUTES.get(parsed.path)
@@ -109,6 +124,7 @@ def make_server(settings: Settings, host: str = "127.0.0.1", port: int = 8791) -
         def _send(self, status: int, payload: Any) -> None:
             body = (json.dumps(payload, indent=2, sort_keys=True, default=str) + "\n").encode()
             self.send_response(status)
+            self._cors()
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()

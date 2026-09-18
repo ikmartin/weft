@@ -17,3 +17,9 @@ demos/*/crawl/
 demos/*/exports/
 demos/*/index.sqlite*
 !demos/synthetic/works/
+
+# the view's build products; its sources are committed
+view/node_modules/
+view/.svelte-kit/
+view/build/
+view/test-results/

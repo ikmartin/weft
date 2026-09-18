@@ -1,0 +1,38 @@
+{
+	"name": "weft-view",
+	"description": "A reader's view on a weft corpus: search, works, results, and the graph the papers state.",
+	"version": "0.1.0",
+	"license": "AGPL-3.0-or-later",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": ">=20"
+	},
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"test": "vitest --run",
+		"test:e2e": "playwright test",
+		"test:all": "npm run test && npm run test:e2e"
+	},
+	"devDependencies": {
+		"@playwright/test": "^1.63.0",
+		"@sveltejs/adapter-static": "^3.0.10",
+		"@sveltejs/kit": "^2.63.0",
+		"@sveltejs/vite-plugin-svelte": "^7.1.2",
+		"@types/d3-force": "^3.0.10",
+		"@types/node": "^22.20.3",
+		"svelte": "^5.56.1",
+		"svelte-check": "^4.6.0",
+		"typescript": "^6.0.3",
+		"vite": "^8.0.16",
+		"vitest": "^4.1.8"
+	},
+	"dependencies": {
+		"d3-force": "^3.0.0",
+		"mathjax": "^3.2.2"
+	}
+}
