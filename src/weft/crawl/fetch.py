@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from weft.config import Settings
+from weft.crawl.arxiv import eprint_url
 from weft.crawl.bibitem import from_source
 from weft.crawl.download import DownloadRefused, get, unpack
 from weft.crawl.net import Service, ServiceError, transport_for
@@ -125,7 +126,7 @@ def fetch(settings: Settings, plan: Plan, *, downloaders: Downloaders | None = N
                 report.left_out += 1
                 continue
             kind = record.downloadable
-            url = f"https://arxiv.org/e-print/{record.arxiv}" if kind == "source" else record.open_pdf
+            url = eprint_url(record.arxiv or "") if kind == "source" else record.open_pdf
             version = record.version_for(kind)
             dest = version_dir(works, record, version)
             try:

@@ -18,8 +18,11 @@ _ABS = re.compile(r"arxiv\.org/abs/(.+?)(v\d+)?$")
 
 
 def eprint_url(ident: str) -> str:
-    """Where an arXiv identifier's source is downloaded from."""
-    return f"https://arxiv.org/e-print/{ident}"
+    """Where an arXiv identifier's source is downloaded from: `export.arxiv.org`, the host arXiv asks automated clients to use.
+
+    Both hosts serve the same bytes and both are one host to the budget (`net._key`), but they are not the same to arXiv: during a refusal weft measured on 2026-09-18, `arxiv.org/e-print/...` answered 406 to urllib and 200 to curl within the same minute, while `export.arxiv.org` answered everyone.
+    """
+    return f"https://export.arxiv.org/e-print/{ident}"
 
 
 class Arxiv:

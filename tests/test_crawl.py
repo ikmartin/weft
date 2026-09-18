@@ -605,9 +605,9 @@ def test_fetch_downloads_in_order_under_the_cap_resumes_and_records_failures(tmp
     # X fails and takes no place under the cap, so P, next in order, is fetched instead
     assert (report.fetched, report.failed, report.left_out) == (3, 1, 0)
     assert got == [
-        "https://arxiv.org/e-print/2001.00001",
-        "https://arxiv.org/e-print/1901.00001",
-        "https://arxiv.org/e-print/2101.00009",
+        "https://export.arxiv.org/e-print/2001.00001",
+        "https://export.arxiv.org/e-print/1901.00001",
+        "https://export.arxiv.org/e-print/2101.00009",
         "https://journal.example/p.pdf",
     ]
     records = load_all(settings.works_dir)

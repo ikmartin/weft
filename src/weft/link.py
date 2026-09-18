@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from weft.config import Settings
-from weft.crawl.work import load_all
+from weft.crawl.work import load_all, norm
 from weft.files import write_atomic
 from weft.locators import forms_for, normalize, parts
 from weft.model import Edge
@@ -135,12 +135,17 @@ def _prefix_of(directory: Path, ident: str) -> str:
 
 
 def _citekeys(settings: Settings) -> dict[str, dict[str, str]]:
-    """Per work key, what each citekey in its bibliography resolved to: `{citing work: {citekey: cited work}}`."""
+    """Per work key, what each citekey in its bibliography resolved to: `{citing work: {citekey: cited work}}`.
+
+    A citation names whichever artifact its author had in hand, and a corpus files a work under whichever identifier ranked first, so a paper citing `arxiv:0902.0087` and a record keyed `doi:10.2140/gt.2019.23.1621` are the same work under two names. Every identifier a record carries is resolved to that record's key here; without it a bibliography can be fully identified and still draw no edge.
+    """
+    records = load_all(settings.works_dir)
+    canonical = {norm(ident): key for key, record in records.items() for ident in record.ids}
     out: dict[str, dict[str, str]] = defaultdict(dict)
-    for key, record in load_all(settings.works_dir).items():
+    for key, record in records.items():
         for reference in record.references:
             if reference.citekey and reference.work:
-                out[key][reference.citekey] = reference.work
+                out[key][reference.citekey] = canonical.get(norm(reference.work), reference.work)
     return out
 
 
