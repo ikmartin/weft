@@ -35,6 +35,8 @@ DEFAULT_SPACING = 1.0
 
 # Names a directory of recorded answers; when it is set the default transport reads from it and makes no request.
 OFFLINE = "WEFT_OFFLINE_RESPONSES"
+# Where the last request to each host is recorded, so two weft processes do not double the rate a service sees. A service throttles a client, and a second process is the same client.
+STATE = "WEFT_STATE_DIR"
 
 Transport = Callable[[str, dict[str, str]], bytes]
 
@@ -45,6 +47,15 @@ class ServiceError(Exception):
 
 class NotFound(ServiceError):
     """The service answered that it has no such record."""
+
+
+def _default_state_dir() -> Path | None:
+    """Where this machine records its last request per host: `$WEFT_STATE_DIR`, else a directory under the user's cache. `WEFT_STATE_DIR=` empty turns sharing off, which is what the tests do."""
+    named = os.environ.get(STATE)
+    if named is not None:
+        return Path(named) if named else None
+    cache = os.environ.get("XDG_CACHE_HOME") or str(Path.home() / ".cache")
+    return Path(cache) / "weft" / "hosts"
 
 
 class HostBudget:
@@ -66,10 +77,12 @@ class HostBudget:
         *,
         clock: Callable[[], float] = time.monotonic,
         sleep: Callable[[float], None] = time.sleep,
+        state_dir: Path | None = None,
     ) -> None:
         self.spacing = dict(HOST_SPACING if spacing is None else spacing)
         self.clock = clock
         self.sleep = sleep
+        self.state = state_dir if state_dir is not None else _default_state_dir()
         self.waited = 0.0
         self.taken = 0
         self._last: dict[str, float] = {}
@@ -107,14 +120,41 @@ class HostBudget:
             gap = max(self.seconds(host), minimum)
             last = self._last.get(host)
             wait = 0.0 if last is None else last + gap - self.clock()
+            shared = self._shared_wait(host, gap)
+            wait = max(wait, shared)
             if wait > 0:
                 self.sleep(wait)
                 self.waited += wait
             else:
                 wait = 0.0
             self._last[host] = self.clock()
+            self._record_shared(host)
             self.taken += 1
             return wait
+
+    def _shared_wait(self, host: str, gap: float) -> float:
+        """How long another process's last request to this host still asks us to wait; 0.0 with no shared state."""
+        path = self._state_path(host)
+        if path is None:
+            return 0.0
+        try:
+            last = float(path.read_text(encoding="utf-8").strip())
+        except (OSError, ValueError):
+            return 0.0
+        return max(0.0, last + gap - time.time())
+
+    def _record_shared(self, host: str) -> None:
+        path = self._state_path(host)
+        if path is None:
+            return
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(f"{time.time():.3f}\n", encoding="utf-8")
+        except OSError:
+            pass  # a corpus on a read-only disk still crawls; it just cannot tell another process what it did
+
+    def _state_path(self, host: str) -> Path | None:
+        return None if self.state is None else self.state / f"{host}.last"
 
 
 # The process's budget. Every Service and downloader uses this one unless a test hands over another.

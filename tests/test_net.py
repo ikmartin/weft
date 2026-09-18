@@ -10,6 +10,7 @@ import pytest
 from support import Tick, budget
 from weft.crawl import net
 from weft.crawl.fetch import default_downloaders
+from weft.crawl.net import HostBudget
 
 
 def test_a_service_caches_answers_and_absences_and_can_be_refreshed(tmp_path: Path) -> None:
@@ -104,3 +105,19 @@ def test_the_offline_transport_answers_from_a_directory_and_names_a_miss(
     # nothing else changes: with no directory named, the transport is a real GET
     monkeypatch.delenv(net.OFFLINE)
     assert net.transport_for("zbmath") is net.http
+
+
+def test_two_budgets_sharing_a_directory_hold_each_other_back(tmp_path: Path) -> None:
+    """A second process is the same client to a service, so the last request to a host is recorded where both can see it."""
+    waited: list[float] = []
+    first = HostBudget({"example.org": 30.0}, state_dir=tmp_path, sleep=waited.append)
+    second = HostBudget({"example.org": 30.0}, state_dir=tmp_path, sleep=waited.append)
+
+    first.take("https://example.org/a")
+    second.take("https://example.org/b")
+    assert waited and 25.0 < waited[-1] <= 30.0, "the second budget waited for the first process's request"
+
+    elsewhere = HostBudget({"example.org": 30.0}, state_dir=None, sleep=waited.append)
+    before = len(waited)
+    elsewhere.take("https://example.org/c")
+    assert len(waited) == before, "a budget with no shared state waits for nothing but itself"

@@ -20,6 +20,12 @@ def _generator() -> Any:
     return module
 
 
+@pytest.fixture(autouse=True)
+def _no_shared_budget(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Tests do not share a host budget across processes: an empty WEFT_STATE_DIR keeps the waiting in the injected clock rather than on the wall."""
+    monkeypatch.setenv("WEFT_STATE_DIR", "")
+
+
 @pytest.fixture
 def synthetic(tmp_path: Path) -> Path:
     """A freshly generated synthetic corpus, writable, so a test may edit or delete its files."""
