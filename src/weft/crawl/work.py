@@ -118,6 +118,7 @@ class Record:
     year: str = ""
     msc: list[str] = field(default_factory=list)
     arxiv_category: str = ""
+    arxiv_version: str = ""  # the version arXiv would serve, e.g. "v2": what a source download actually gets
     licence: str = ""
     depth: int = 0
     reached_from: list[str] = field(default_factory=list)
@@ -158,7 +159,8 @@ class Record:
     def version_for(self, kind: str) -> Version:
         """The version a download of this kind produces: the arXiv id with its `vN`, or the work key for a PDF."""
         if kind == "source" and self.arxiv:
-            return Version(id=f"arxiv:{self.arxiv}", work=self.key, has_source=True)
+            # the version arXiv serves, when it said which, so a result knows the artifact it was read from
+            return Version(id=f"arxiv:{self.arxiv}{self.arxiv_version}", work=self.key, has_source=True)
         return Version(id=self.key, work=self.key, has_pdf=kind == "pdf")
 
     def version_from_local(self, local: str) -> Version:
@@ -247,6 +249,7 @@ class Record:
             "year": self.year,
             "msc": list(self.msc),
             "arxiv_category": self.arxiv_category,
+            "arxiv_version": self.arxiv_version,
             "licence": self.licence,
             "depth": self.depth,
             "reached_from": list(self.reached_from),
@@ -353,6 +356,7 @@ def load(path: Path) -> Record | None:
             year=str(data.get("year", "")),
             msc=[str(m) for m in data.get("msc", [])],
             arxiv_category=str(data.get("arxiv_category", "")),
+            arxiv_version=str(data.get("arxiv_version", "")),
             licence=str(data.get("licence", "")),
             depth=int(data.get("depth", 0)),
             reached_from=[str(k) for k in data.get("reached_from", [])],

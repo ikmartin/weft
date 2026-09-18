@@ -88,6 +88,7 @@ def test_a_tally_counts_primary_families_any_family_categories_and_neither() -> 
 CONTRACT = {
     "record",
     "key",
+    "arxiv_version",
     "ids",
     "title",
     "authors",
@@ -334,8 +335,11 @@ class FakeOa:
 
 
 class FakeArxiv:
+    def metadata(self, ids: list[str]) -> dict[str, tuple[str, str]]:
+        return {"2101.00009": ("math.AG", "v3")}
+
     def categories(self, ids: list[str]) -> dict[str, str]:
-        return {"2101.00009": "math.AG"}
+        return {ident: cat for ident, (cat, _v) in self.metadata(ids).items() if cat}
 
 
 class FakeResolver:

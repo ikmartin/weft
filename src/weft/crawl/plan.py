@@ -542,15 +542,20 @@ class Planner:
                     w.add_ids(zb.ids)
                     w.fill(zb.title, zb.authors, str(zb.year or ""), zb.msc)
                     w.sources["zbmath"] = zb.document
-        pending = [w.arxiv for w in records if not w.msc and w.arxiv and not w.arxiv_category]
+        # one answer carries both the primary category and the version arXiv would serve, so every arXiv work is asked about, not only the unclassified ones
+        pending = [w.arxiv for w in records if w.arxiv and (not (w.msc or w.arxiv_category) or not w.arxiv_version)]
         if pending:
             try:
-                cats = self.c.arxiv.categories([a for a in pending if a])
+                found = self.c.arxiv.metadata([a for a in pending if a])
             except ServiceError:
-                cats = {}
+                found = {}
             for w in records:
-                if not w.msc and w.arxiv:
-                    w.arxiv_category = w.arxiv_category or cats.get(norm("arxiv:" + w.arxiv).partition(":")[2], "")
+                if not w.arxiv:
+                    continue
+                cat, version = found.get(norm("arxiv:" + w.arxiv).partition(":")[2], ("", ""))
+                if not w.msc:
+                    w.arxiv_category = w.arxiv_category or cat
+                w.arxiv_version = w.arxiv_version or version
 
     # --- the walk -----------------------------------------------------------------------------------
 

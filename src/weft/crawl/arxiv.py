@@ -28,6 +28,27 @@ class Arxiv:
     def __init__(self, service: Service) -> None:
         self.service = service
 
+    def metadata(self, idents: list[str]) -> dict[str, tuple[str, str]]:
+        """(primary category, latest version) by arXiv number without its version, for the numbers arXiv knows.
+
+        Both come from one answer: the export API's `id` carries the version arXiv would serve, which is the version a source download actually gets.
+        """
+        out: dict[str, tuple[str, str]] = {}
+        todo = sorted(set(idents))
+        for i in range(0, len(todo), BATCH):
+            chunk = todo[i : i + BATCH]
+            url = API + "?" + urllib.parse.urlencode({"id_list": ",".join(chunk), "max_results": str(len(chunk))})
+            try:
+                root = ET.fromstring(self.service.get(url))
+            except (ServiceError, ET.ParseError):
+                continue
+            for entry in root.findall("atom:entry", _NS):
+                ident = entry.findtext("atom:id", default="", namespaces=_NS)
+                cat = entry.find("arxiv:primary_category", _NS)
+                if m := _ABS.search(ident):
+                    out[m.group(1)] = (cat.get("term", "") if cat is not None else "", m.group(2) or "")
+        return out
+
     def categories(self, idents: list[str]) -> dict[str, str]:
         """Primary category by arXiv number (without version), for the numbers arXiv knows.
 
@@ -41,18 +62,4 @@ class Arxiv:
         dict of str to str
             Only the numbers arXiv answered for; a refused or unparseable batch contributes nothing rather than failing the plan.
         """
-        out: dict[str, str] = {}
-        todo = sorted(set(idents))
-        for i in range(0, len(todo), BATCH):
-            chunk = todo[i : i + BATCH]
-            url = API + "?" + urllib.parse.urlencode({"id_list": ",".join(chunk), "max_results": str(len(chunk))})
-            try:
-                root = ET.fromstring(self.service.get(url))
-            except (ServiceError, ET.ParseError):
-                continue
-            for entry in root.findall("atom:entry", _NS):
-                ident = entry.findtext("atom:id", default="", namespaces=_NS)
-                cat = entry.find("arxiv:primary_category", _NS)
-                if (m := _ABS.search(ident)) and cat is not None:
-                    out[m.group(1)] = cat.get("term", "")
-        return out
+        return {ident: cat for ident, (cat, _version) in self.metadata(idents).items() if cat}

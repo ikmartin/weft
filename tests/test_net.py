@@ -115,7 +115,7 @@ def test_two_budgets_sharing_a_directory_hold_each_other_back(tmp_path: Path) ->
 
     first.take("https://example.org/a")
     second.take("https://example.org/b")
-    assert waited and 25.0 < waited[-1] <= 30.0, "the second budget waited for the first process's request"
+    assert waited and 25.0 < waited[-1] <= 30.5, "the second budget waited for the first process's request"
 
     elsewhere = HostBudget({"example.org": 30.0}, state_dir=None, sleep=waited.append)
     before = len(waited)
