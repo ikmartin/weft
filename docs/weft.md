@@ -108,11 +108,11 @@ Each step reads what the one before it wrote and writes files; each is resumable
 
 ### 3.1 Asking services politely
 
-Every request goes through one `Service`, so the spacing, the cache and the transport are the same everywhere. Per host, seconds between requests: `arxiv.org` and `export.arxiv.org` 3.0, `api.zbmath.org` 1.0, `api.crossref.org` 1.0, `api.openalex.org` 0.2, anything else 1.0. Bulk downloads take no more than the host's own spacing (`download.BULK_SPACING`, 3.0): 35 e-print PDFs in a row at that rate drew no refusal.
+Every request goes through one `Service`, so the spacing, the cache and the transport are the same everywhere. That transport advertises **ALPN** (`net.CONTEXT`): Python's `urllib` is alone among common clients in not doing so, and arXiv's edge answers a handshake without it with `406 Not Acceptable`. Per host, seconds between requests: `arxiv.org` and `export.arxiv.org` 3.0, `api.zbmath.org` 1.0, `api.crossref.org` 1.0, `api.openalex.org` 0.2, anything else 1.0. Bulk downloads take no more than the host's own spacing (`download.BULK_SPACING`, 3.0): 35 e-print PDFs in a row at that rate drew no refusal.
 
 The budget is **shared between processes**: the last request per host is recorded under `$WEFT_STATE_DIR`, else `$XDG_CACHE_HOME/weft/hosts`, else `~/.cache/weft/hosts`, because a service throttles a client and two processes are one client. `WEFT_STATE_DIR=` empty turns sharing off, which is what the tests do. `WEFT_OFFLINE_RESPONSES` names a directory of recorded answers; when it is set the default transport makes no request at all, which is why no test touches the network.
 
-E-prints are downloaded from **`export.arxiv.org`**, the host arXiv asks automated clients to use. Both hosts serve the same bytes and both are one host to the budget, but not to arXiv: measured on 2026-09-18, `arxiv.org/e-print/...` answered 406 to urllib and 200 to curl within the same minute, while the export host answered 35 downloads in a row.
+E-prints are downloaded from **`export.arxiv.org`**, the host arXiv asks automated clients to use. Both hosts serve the same bytes and both are one host to the budget.
 
 ### 3.2 Numbering, and why a corpus compiles
 

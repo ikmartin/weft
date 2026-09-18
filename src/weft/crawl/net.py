@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import ssl
 import threading
 import time
 import urllib.error
@@ -42,7 +43,11 @@ Transport = Callable[[str, dict[str, str]], bytes]
 
 
 class ServiceError(Exception):
-    """A service could not be reached or refused the request."""
+    """A service could not be reached or refused the request; `code` is the HTTP status where there was one."""
+
+    def __init__(self, message: str, code: int = 0) -> None:
+        super().__init__(message)
+        self.code = code
 
 
 class NotFound(ServiceError):
@@ -157,6 +162,24 @@ class HostBudget:
         return None if self.state is None else self.state / f"{host}.last"
 
 
+# Statuses worth asking again about. A 406 is here as belt and braces behind `CONTEXT`: it was arXiv's answer to a handshake with no ALPN, and a 406 that still arrives is not the request's fault.
+RETRY = (406, 429, 500, 502, 503)
+ATTEMPTS = 3
+
+
+def _context() -> ssl.SSLContext:
+    """A TLS context that advertises ALPN, which is what every other HTTP client does and what arXiv's edge requires.
+
+    Python's `urllib` never calls `set_alpn_protocols`, so its ClientHello carries no ALPN extension; curl and httpx always send one. arXiv's edge answers such a handshake with 406 Not Acceptable, some of the time and on some paths, which is what the refusals of 2026-09-17 and 2026-09-18 actually were -- read first as a missing header, then as a rate limit, then as a wrong hostname, and none of those. Measured on 2026-09-18 over six interleaved pairs against one OAI endpoint: the default context 3/6, this context 6/6, with the failures and successes alternating on the same identifiers minutes apart.
+    """
+    ctx = ssl.create_default_context()
+    ctx.set_alpn_protocols(["http/1.1"])
+    return ctx
+
+
+CONTEXT = _context()
+OPENER = urllib.request.build_opener(urllib.request.HTTPSHandler(context=CONTEXT))
+
 # The process's budget. Every Service and downloader uses this one unless a test hands over another.
 BUDGET = HostBudget()
 
@@ -165,12 +188,12 @@ def http(url: str, headers: dict[str, str]) -> bytes:
     """GET with weft's User-Agent; the default transport when nothing is recorded."""
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, **headers})
     try:
-        with urllib.request.urlopen(req, timeout=60) as resp:  # noqa: S310
+        with OPENER.open(req, timeout=60) as resp:
             return bytes(resp.read())
     except urllib.error.HTTPError as exc:
         if exc.code == 404:
             raise NotFound(url.split("?")[0]) from exc
-        raise ServiceError(f"{url.split('?')[0]}: HTTP {exc.code} {exc.reason}") from exc
+        raise ServiceError(f"{url.split('?')[0]}: HTTP {exc.code} {exc.reason}", exc.code) from exc
     except urllib.error.URLError as exc:
         raise ServiceError(f"{url.split('?')[0]}: {exc.reason}") from exc
 
@@ -255,19 +278,24 @@ class Service:
             if path.is_file():
                 self.cached += 1
                 return path.read_bytes()
-        self.budget.take(url)
-        self.requests += 1
-        try:
-            body = self.transport(url, headers or {})
-        except NotFound:
-            if path is not None:
-                path.parent.mkdir(parents=True, exist_ok=True)
-                path.with_suffix(".absent").write_text(url, encoding="utf-8")
-            raise
-        except ServiceError as exc:
-            self.failures += 1
-            self.last_failure = str(exc)
-            raise
+        body = b""
+        for attempt in range(ATTEMPTS):
+            self.budget.take(url)
+            self.requests += 1
+            try:
+                body = self.transport(url, headers or {})
+                break
+            except NotFound:
+                if path is not None:
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.with_suffix(".absent").write_text(url, encoding="utf-8")
+                raise
+            except ServiceError as exc:
+                self.failures += 1
+                self.last_failure = str(exc)
+                if exc.code not in RETRY or attempt == ATTEMPTS - 1:
+                    raise
+                self.budget.sleep(2.0 * (attempt + 1))
         if path is not None:
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(body)
