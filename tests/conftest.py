@@ -32,3 +32,23 @@ def synthetic(tmp_path: Path) -> Path:
     dest = tmp_path / "synthetic"
     _generator().write_corpus(dest)
     return dest
+
+
+@pytest.fixture
+def library(synthetic: Path) -> Any:
+    """The synthetic corpus extracted, linked and indexed: the corpus every query surface answers from."""
+    from weft.config import load
+    from weft.extract import extract_corpus
+    from weft.link import link
+    from weft.store import open_store
+    from weft.store.rebuild import rebuild
+
+    settings = load(synthetic)
+    extract_corpus(settings)
+    link(settings, log=synthetic / "record.md")
+    store = open_store(settings)
+    try:
+        rebuild(settings, store)
+    finally:
+        store.close()
+    return settings

@@ -339,6 +339,18 @@ def serve(ctx: click.Context, host: str, port: int, corpus: str | None) -> None:
 
 
 @main.command()
+@corpus_option
+@click.pass_context
+def mcp(ctx: click.Context, corpus: str | None) -> None:
+    """Answer the same queries as MCP tools on stdin and stdout, for an agent rather than a shell."""
+    from weft.mcp import TOOLS, serve_stdio
+
+    settings = settings_or_exit(ctx, corpus)
+    note(f"weft mcp over {settings.root} · tools: {' '.join(t.name for t in TOOLS)}")
+    serve_stdio(settings)
+
+
+@main.command()
 @click.argument("identifier")
 @corpus_option
 @click.pass_context
