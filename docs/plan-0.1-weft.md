@@ -106,6 +106,8 @@ Everything else is deliberately absent. No inference from text similarity, from 
 
 Two known hazards to measure rather than assume: a locator that resolves against the wrong version's numbering (hence per-version results), and the abbreviation table's English-only vocabulary.
 
+**An ambiguous match records no edge and is logged.** A locator that answers several results, or a multi-part postnote where some parts resolve and others do not, goes to [multi-match-record.md](multi-match-record.md) with its evidence. Whether such a case should become an edge with a confidence, no edge, or a best guess marked uncertain is a decision to take once that file shows what these cases actually are; a problem seen once is not a problem understood.
+
 ## 8. The query surface
 
 One set of queries, three deliveries: JSON on stdout from the CLI, a local HTTP API, and an MCP server wrapping the same calls so an agent gets tools rather than a shell.
