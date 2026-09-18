@@ -66,7 +66,7 @@ Let $M$ be a valuated matroid of rank $r$ on a finite ground set $E$. Then the t
 \end{theorem}
 
 \begin{proof}
-Balancing is local at a codimension-one cone, so it is enough to check one wall. By \cite[Theorem 2.1]{other} the weighted count across a wall of $Z(M)$ agrees with the local degree of the associated stable map, and that count vanishes exactly when the wall is interior. The identification of the recession fan is then the computation of \cite{third}.
+Balancing is local at a codimension-one cone, so it is enough to check one wall. By \cite[Theorem 1.1]{other} the weighted count across a wall of $Z(M)$ agrees with the local degree of the associated stable map, and that count vanishes exactly when the wall is interior. The identification of the recession fan is then the computation of \cite{third}.
 \end{proof}
 
 \section{Consequences}
@@ -113,7 +113,7 @@ Let $M$ be a valuated matroid of rank $r$ on a finite ground set $E$. Then the t
 \end{theorem}
 
 \begin{proof}
-Balancing is local at a codimension-one cone, so it is enough to check one wall. By \cite[Theorem 2.1]{other} the weighted count across a wall of $Z(M)$ agrees with the local degree of the associated stable map, and that count vanishes exactly when the wall is interior. The identification of the recession fan is then the computation of \cite{third}.
+Balancing is local at a codimension-one cone, so it is enough to check one wall. By \cite[Theorem 1.1]{other} the weighted count across a wall of $Z(M)$ agrees with the local degree of the associated stable map, and that count vanishes exactly when the wall is interior. The identification of the recession fan is then the computation of \cite{third}.
 \end{proof}
 
 \section{Consequences}
@@ -151,7 +151,7 @@ Let $C$ be a weighted stable curve of genus $g$ with weights summing to less tha
 \end{theorem}
 
 \begin{proof}
-The weight condition forces every component to be rational, so the dualising sheaf is a sum of line bundles of negative degree. The vanishing for each summand is the local computation of \cite[Theorem 2.1]{other}, and the compatibility of the two normalisations is the point of \cite{third}.
+The weight condition forces every component to be rational, so the dualising sheaf is a sum of line bundles of negative degree. The vanishing for each summand is the local computation of \cite[Theorem 1.1]{other}, and the compatibility of the two normalisations is the point of \cite{third}.
 \end{proof}
 
 \section{A consequence}
@@ -186,7 +186,7 @@ The script is deterministic and idempotent -- fixed dates, no network, no random
 - **`arxiv:2401.00001`, two versions.** v1 states a theorem, a lemma and a proposition; v2 states the theorem and the proposition and **drops the lemma**, which renumbers the proposition. This is the case the whole per-version data model exists for: results belong to a version, and "the same result in two versions" is a mapping and not an identity.
 - **`arxiv:2401.00002`, one version.** The second seed, cited by the first and citing it back, so the citation graph has a cycle and a walk has to cope with one.
 - **`doi:10.4171/synth.0003`, metadata-only.** Depth 2, no source and no PDF, reached from both seeds by lookup rather than by a printed identifier. It is the node that is in the citation graph and absent from the result graph, and its key has a slash in the value, which a home sanitises away so one identifier stays one directory.
-- **Each version with a source: `works/<home>/<version-local>/src/main.tex`.** `\\newtheorem` declarations to read numbering off, labelled statements, and in every proof one `\\cite[Theorem 2.1]{other}` (a locator citation, §7's first case) and one bare `\\cite{third}` (an unspecified citation, §7's second case).
+- **Each version with a source: `works/<home>/<version-local>/src/main.tex`.** `\\newtheorem` declarations to read numbering off, labelled statements, and in every proof one `\\cite[Theorem 1.1]{other}` (a locator citation, §7's first case) and one bare `\\cite{third}` (an unspecified citation, §7's second case).
 - **An inlined `\\begin{thebibliography}` in every source**, one `\\bibitem` printing an arXiv id and one printing nothing identifying at all. Both real seed papers inlined their bibliography and 9% of their entries carried a usable identifier; this is that situation in miniature, and it is what the `\\bibitem` parser and the lookup path are tested against.
 - **No `results.json` and no PDFs.** Extraction is M2's, so nothing here claims to be extraction output; `rebuild` reads `results.json` when it is there and the tests write one by hand to check that it does.
 """

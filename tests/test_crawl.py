@@ -19,6 +19,8 @@ from weft.crawl.openalex import OaRecord, OpenAlex
 from weft.crawl.plan import Clients, PlanRefused, fingerprint, load_plan, plan, seed_texts, seeds, survey
 from weft.crawl.work import Record, Reference, Version, load, load_all, norm, ranked, save
 from weft.crawl.zbmath import Zbmath, ZbRecord
+from weft.crawl.zbmath import parse as zbmath_parse
+from weft.identity import is_doi
 from weft.lookup import Candidate, Query
 
 # --- formatted bibliographies -------------------------------------------------------------------------
@@ -191,6 +193,26 @@ def test_zbmath_gives_identifiers_subjects_and_resolved_references() -> None:
     doc = zb.by_document(1112315)
     assert doc is not None and doc.title.startswith("Equivariant Chow groups") and len(doc.references) == 41
     assert zb.by_id("doi:10.9999/nothing") is None
+
+
+def test_a_licence_notice_where_a_doi_belongs_is_not_an_identifier() -> None:
+    notice = "zbMATH Open Web Interface contents unavailable due to conflicting licenses."
+    record = zbmath_parse(
+        {
+            "id": 1,
+            "title": {"title": notice},
+            "contributors": {"authors": [{"name": notice}, {"name": "A. Author"}]},
+            "links": [{"type": "doi", "identifier": notice}, {"type": "doi", "identifier": "10.1/a"}],
+            "references": [{"doi": notice, "text": notice}, {"doi": "10.1/b", "text": "B, Another"}],
+        }
+    )
+    assert record.ids == ["doi:10.1/a"]
+    assert record.title == "" and record.authors == ["A. Author"]
+    assert [(r.work, r.identified_by, r.text) for r in record.references] == [
+        ("", "", ""),
+        ("doi:10.1/b", "index", "B, Another"),
+    ]
+    assert is_doi("10.1/a") and not is_doi(notice) and not is_doi("") and not is_doi(None)
 
 
 def test_openalex_gives_reference_lists_and_open_copies() -> None:

@@ -18,7 +18,7 @@ from typing import Any
 
 from weft.bib import BibEntry
 from weft.crawl.net import NotFound, Service, ServiceError
-from weft.identity import WorkId
+from weft.identity import WorkId, is_doi
 
 ZBMATH = "https://api.zbmath.org/v1/document/_search"
 CROSSREF = "https://api.crossref.org/works"
@@ -173,7 +173,11 @@ def _zbmath_candidates(q: Query, data: dict[str, Any]) -> list[Candidate]:
         conf = score(q, title, authors, year)
         if conf < POSSIBLE:
             continue
-        ids = [f"doi:{d}" for d in dois] + ([f"zbl:{zbl}"] if zbl else []) + [f"arxiv:{a}" for a in preprints]
+        ids = (
+            [f"doi:{d}" for d in dois if is_doi(d)]
+            + ([f"zbl:{zbl}"] if zbl else [])
+            + [f"arxiv:{a}" for a in preprints]
+        )
         if not ids:
             continue
         out.append(Candidate(ids[0], "zbMATH Open", conf, title, authors, year, ids[1:]))
@@ -188,7 +192,7 @@ def _crossref_candidates(q: Query, data: dict[str, Any]) -> list[Candidate]:
         parts = ((it.get("issued") or {}).get("date-parts") or [[None]])[0]
         year = str(parts[0]) if parts and parts[0] else ""
         conf = score(q, title, authors, year)
-        if conf < POSSIBLE or not it.get("DOI"):
+        if conf < POSSIBLE or not is_doi(it.get("DOI")):
             continue
         out.append(Candidate(f"doi:{it['DOI']}", "Crossref", conf, title, authors, year))
     return out

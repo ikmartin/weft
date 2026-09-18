@@ -1,0 +1,54 @@
+{
+  "edges": [
+    {
+      "confidence": 1.0,
+      "evidence": "theorem 1.1",
+      "origin": "locator",
+      "src": "arxiv:2401.00002v1#thm-1.1",
+      "to": "arxiv:2401.00001v2#thm-1.1"
+    },
+    {
+      "confidence": 1.0,
+      "evidence": "\\cite{third}",
+      "origin": "unspecified",
+      "src": "arxiv:2401.00002v1#thm-1.1",
+      "to": "doi:10.4171/synth.0003"
+    },
+    {
+      "confidence": 1.0,
+      "evidence": "\\ref{arxiv-2401.00002v1-thm-1.1}",
+      "origin": "internal",
+      "src": "arxiv:2401.00002v1#cor-2.1",
+      "to": "arxiv:2401.00002v1#thm-1.1"
+    }
+  ],
+  "method": "latex",
+  "numbering": "emulated",
+  "results": [
+    {
+      "aliases": [
+        "thm:vanish"
+      ],
+      "local": "thm-1.1",
+      "number": "1.1",
+      "page": "",
+      "proof": "The weight condition forces every component to be rational, so the dualising sheaf is a sum of line bundles of negative degree. The vanishing for each summand is the local computation of \\cite[Theorem 1.1]{other}, and the compatibility of the two normalisations is the point of \\cite{third}.",
+      "statement": "Let $C$ be a weighted stable curve of genus $g$ with weights summing to less than one. Then $H^1(C, \\omega_C) = 0$.",
+      "taxon": "Theorem",
+      "title": ""
+    },
+    {
+      "aliases": [
+        "cor:rigid"
+      ],
+      "local": "cor-2.1",
+      "number": "2.1",
+      "page": "",
+      "proof": "Immediate from Theorem~\\ref{arxiv-2401.00002v1-thm-1.1} and Serre duality.",
+      "statement": "Such a curve admits no infinitesimal automorphism.",
+      "taxon": "Corollary",
+      "title": ""
+    }
+  ],
+  "version": "arxiv:2401.00002v1"
+}

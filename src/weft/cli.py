@@ -136,6 +136,44 @@ def survey(ctx: click.Context, refresh: bool, as_json: bool, corpus: str | None)
     emit(found.payload()) if as_json else click.echo(found.summary())
 
 
+@main.command()
+@click.argument("idents", nargs=-1, metavar="[IDENT]...")
+@click.option("--all", "redo", is_flag=True, help="Re-extract versions that already have results.")
+@click.option(
+    "--proofs",
+    type=click.Choice(["verbatim", "none"]),
+    default="verbatim",
+    show_default=True,
+    help="Keep each result's proof, or keep none of them.",
+)
+@click.option(
+    "--compile", "run_compile", is_flag=True, help="Run latexmk for real numbers where no .aux is beside the source."
+)
+@click.option("--json", "as_json", is_flag=True)
+@corpus_option
+@click.pass_context
+def extract(
+    ctx: click.Context,
+    idents: tuple[str, ...],
+    redo: bool,
+    proofs: str,
+    run_compile: bool,
+    as_json: bool,
+    corpus: str | None,
+) -> None:
+    """Read the named works' LaTeX sources into statements and proofs; with no IDENT, every version that has a source and no results."""
+    from weft.extract import extract_corpus
+
+    settings = settings_or_exit(ctx, corpus)
+    report = extract_corpus(settings, idents, proofs=proofs, redo=redo, compile=run_compile)
+    if as_json:
+        emit(report.payload())
+    else:
+        click.echo(report.summary())
+    if report.refused and not report.extracted:
+        ctx.exit(EXIT_CONTENT)
+
+
 @main.group()
 def index() -> None:
     """The queryable view of the corpus, derived from works/."""
@@ -180,6 +218,124 @@ def index_counts(ctx: click.Context, as_json: bool, corpus: str | None) -> None:
         emit(counts)
         return
     click.echo(", ".join(f"{n} {name}" for name, n in sorted(counts.items())))
+
+
+@main.command()
+@click.option("--json", "as_json", is_flag=True)
+@corpus_option
+@click.pass_context
+def link(ctx: click.Context, as_json: bool, corpus: str | None) -> None:
+    """Draw the edges the papers state, into each version's results.json. Ambiguities are logged, never guessed at."""
+    from weft.link import link as run_link
+
+    settings = settings_or_exit(ctx, corpus)
+    report = run_link(settings)
+    emit(report.payload()) if as_json else click.echo(report.summary())
+
+
+def _with_store(ctx: click.Context, corpus: str | None):  # type: ignore[no-untyped-def]
+    """The corpus's index, opened and closed around one query."""
+    from contextlib import closing
+
+    from weft.store import open_store
+
+    return closing(open_store(settings_or_exit(ctx, corpus)))
+
+
+@main.command()
+@click.argument("text")
+@click.option("--limit", default=25, show_default=True)
+@corpus_option
+@click.pass_context
+def search(ctx: click.Context, text: str, limit: int, corpus: str | None) -> None:
+    """Works whose title or authors answer TEXT."""
+    from weft import query
+
+    with _with_store(ctx, corpus) as store:
+        emit(query.search(store, text, limit=limit))
+
+
+@main.command()
+@click.argument("key")
+@click.option("--no-text", is_flag=True, help="Leave the statement and the proof out.")
+@corpus_option
+@click.pass_context
+def get(ctx: click.Context, key: str, no_text: bool, corpus: str | None) -> None:
+    """One result by key (arxiv:1709.09864v2#thm-4.1), with what it uses and what uses it."""
+    from weft import query
+
+    with _with_store(ctx, corpus) as store:
+        found = query.get(store, key, text=not no_text)
+    if found is None:
+        note(f"Error: {key} is not a result of this corpus")
+        ctx.exit(EXIT_CONTENT)
+        return
+    emit(found)
+
+
+@main.command()
+@click.argument("key")
+@click.option("--depth", default=6, show_default=True)
+@click.option("--text", is_flag=True, help="Include each statement.")
+@corpus_option
+@click.pass_context
+def closure(ctx: click.Context, key: str, depth: int, text: bool, corpus: str | None) -> None:
+    """Everything a result depends on, and the citations that name no result."""
+    from weft import query
+
+    with _with_store(ctx, corpus) as store:
+        emit(query.closure(store, key, depth=depth, text=text))
+
+
+@main.command()
+@click.argument("key")
+@corpus_option
+@click.pass_context
+def dependents(ctx: click.Context, key: str, corpus: str | None) -> None:
+    """What uses a result."""
+    from weft import query
+
+    with _with_store(ctx, corpus) as store:
+        emit(query.dependents(store, key))
+
+
+@main.command()
+@click.argument("identifier")
+@corpus_option
+@click.pass_context
+def work(ctx: click.Context, identifier: str, corpus: str | None) -> None:
+    """A work, its versions, its results, and what it cites."""
+    from weft import query
+
+    with _with_store(ctx, corpus) as store:
+        emit(query.neighbourhood(store, identifier))
+
+
+@main.command()
+@click.argument("identifier")
+@corpus_option
+@click.pass_context
+def versions(ctx: click.Context, identifier: str, corpus: str | None) -> None:
+    """The versions of a work and what each one states, so a result dropped between them is visible."""
+    from weft import query
+
+    with _with_store(ctx, corpus) as store:
+        emit(query.versions(store, identifier))
+
+
+@main.command()
+@click.option("--host", default="127.0.0.1", show_default=True)
+@click.option("--port", default=8791, show_default=True)
+@corpus_option
+@click.pass_context
+def serve(ctx: click.Context, host: str, port: int, corpus: str | None) -> None:
+    """Answer the same queries over HTTP, read-only, for the view and for anything else that would rather ask over a socket."""
+    from weft.serve import ROUTES
+    from weft.serve import serve as run_serve
+
+    settings = settings_or_exit(ctx, corpus)
+    note(f"weft serving {settings.root} at http://{host}:{port} · routes: {' '.join(sorted(ROUTES))}")
+    run_serve(settings, host, port)
 
 
 @main.command()

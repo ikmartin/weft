@@ -6,11 +6,12 @@ No test touches the network. Service clients take a transport and recorded answe
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 from weft.config import Settings
 from weft.crawl.net import HostBudget
+from weft.extract.extract import Extraction, Provenance, extract, read_paper
 
 RESPONSES = Path(__file__).parent / "responses"
 CRAWL = json.loads((RESPONSES / "crawl_responses.json").read_text(encoding="utf-8"))["responses"]
@@ -49,3 +50,27 @@ def seed_file(root: Path, text: str, name: str = "seeds.bib") -> str:
     """Write a seed bibliography into a corpus; returns its name as `[seeds] bib` records it."""
     (root / name).write_text(text, encoding="utf-8")
     return name
+
+
+PROV = Provenance(
+    digest="arxiv:0000.00000",
+    prefix="arxiv-0000.00000v1",
+    extracted_from="arxiv:0000.00000v1",
+    proofs="verbatim",
+    created="2026-09-18",
+    tool="weft test",
+)
+
+
+def paper(root: Path, text: str, name: str = "main.tex") -> Path:
+    """Write one LaTeX file as a paper's whole source, and return the directory holding it."""
+    root.mkdir(parents=True, exist_ok=True)
+    (root / name).write_text(text, encoding="utf-8")
+    return root
+
+
+def extracted(root: Path, text: str, *, proofs: str = "verbatim", prefix: str | None = None) -> Extraction:
+    """Extract a one-file paper written from `text`, with a fixed provenance so a test can compare bytes."""
+    paper(root, text)
+    prov = PROV if prefix is None else replace(PROV, prefix=prefix)
+    return extract(read_paper(root), replace(prov, proofs=proofs))

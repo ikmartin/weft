@@ -1,0 +1,31 @@
+% !LOOM digest: arxiv:2401.00001
+% !LOOM prefix: arxiv-2401.00001v2
+% !LOOM extracted-from: arxiv:2401.00001v2
+% !LOOM method: extract
+% !LOOM proofs: verbatim
+% !LOOM created: 2026-09-18
+% !LOOM numbering: emulated
+% !LOOM tool: weft 0.1.0.dev0
+
+\section{Statements}\label{arxiv-2401.00001v2-sec-1}
+
+\begin{theorem}[{\cite[Theorem 1.1]{arxiv:2401.00001}}]\label{arxiv-2401.00001v2-thm-1.1}
+\label{arxiv-2401.00001v2-thm:main}
+Let $M$ be a valuated matroid of rank $r$ on a finite ground set $E$. Then the tropical cycle $Z(M)$ is balanced and its recession fan is the Bergman fan of the underlying matroid.
+\end{theorem}
+
+\begin{proof}
+Balancing is local at a codimension-one cone, so it is enough to check one wall. By \cite[Theorem 1.1]{other} the weighted count across a wall of $Z(M)$ agrees with the local degree of the associated stable map, and that count vanishes exactly when the wall is interior. The identification of the recession fan is then the computation of \cite{third}.
+\end{proof}
+
+\section{Consequences}\label{arxiv-2401.00001v2-sec-2}
+
+\begin{proposition}[{\cite[Proposition 2.1]{arxiv:2401.00001}}]\label{arxiv-2401.00001v2-prop-2.1}
+\uses{arxiv-2401.00001v2-thm-1.1}
+\label{arxiv-2401.00001v2-prop:degree}
+The degree of $Z(M)$ equals the number of bases of $M$ of minimal valuation.
+\end{proposition}
+
+\begin{proof}
+Intersect with a generic translate of the standard hyperplane; connectivity in codimension one is now immediate from Theorem~\ref{arxiv-2401.00001v2-thm-1.1} and the lemma of the first version is not needed.
+\end{proof}

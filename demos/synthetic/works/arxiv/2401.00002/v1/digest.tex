@@ -1,0 +1,31 @@
+% !LOOM digest: arxiv:2401.00002
+% !LOOM prefix: arxiv-2401.00002v1
+% !LOOM extracted-from: arxiv:2401.00002v1
+% !LOOM method: extract
+% !LOOM proofs: verbatim
+% !LOOM created: 2026-09-18
+% !LOOM numbering: emulated
+% !LOOM tool: weft 0.1.0.dev0
+
+\section{The vanishing}\label{arxiv-2401.00002v1-sec-1}
+
+\begin{theorem}[{\cite[Theorem 1.1]{arxiv:2401.00002}}]\label{arxiv-2401.00002v1-thm-1.1}
+\label{arxiv-2401.00002v1-thm:vanish}
+Let $C$ be a weighted stable curve of genus $g$ with weights summing to less than one. Then $H^1(C, \omega_C) = 0$.
+\end{theorem}
+
+\begin{proof}
+The weight condition forces every component to be rational, so the dualising sheaf is a sum of line bundles of negative degree. The vanishing for each summand is the local computation of \cite[Theorem 1.1]{other}, and the compatibility of the two normalisations is the point of \cite{third}.
+\end{proof}
+
+\section{A consequence}\label{arxiv-2401.00002v1-sec-2}
+
+\begin{corollary}[{\cite[Corollary 2.1]{arxiv:2401.00002}}]\label{arxiv-2401.00002v1-cor-2.1}
+\uses{arxiv-2401.00002v1-thm-1.1}
+\label{arxiv-2401.00002v1-cor:rigid}
+Such a curve admits no infinitesimal automorphism.
+\end{corollary}
+
+\begin{proof}
+Immediate from Theorem~\ref{arxiv-2401.00002v1-thm-1.1} and Serre duality.
+\end{proof}

@@ -20,7 +20,7 @@ DISPLAY = {"arxiv": "arXiv", "doi": "doi", "mr": "MR", "zbl": "Zbl", "work": "wo
 
 _ARXIV_URL = re.compile(r"arxiv\.org/(?:abs|pdf|e-print)/([^\s?#]+)", re.I)
 _DOI_URL = re.compile(r"(?:doi\.org/|dx\.doi\.org/)(10\.[^\s?#]+)", re.I)
-_DOI_BARE = re.compile(r"^10\.\d{4,9}/\S+$")
+_DOI_BARE = re.compile(r"^10\.\d+/\S+$")
 _ARXIV_DOI = re.compile(r"^10\.48550/arxiv\.(\S+)$", re.I)
 _UNSAFE = re.compile(r"[^A-Za-z0-9._-]")
 
@@ -48,6 +48,14 @@ class WorkId:
     def preprint(self) -> bool:
         """Whether an artifact can be fetched under this identifier, which at M1 means arXiv."""
         return self.scheme == "arxiv"
+
+
+def is_doi(value: object) -> bool:
+    """Whether a value is shaped like a DOI rather than like prose.
+
+    A service answers where a DOI belongs with whatever it has, and zbMATH answers a restricted record with a licence notice; taking that at its word files a work under `doi:zbMATH Open Web Interface contents unavailable...` and merges every restricted record into one. A DOI is a `10.` prefix, a registrant, a slash and no whitespace, so a sentence cannot pass for one.
+    """
+    return bool(_DOI_BARE.match(str(value or "").strip()))
 
 
 def sanitise(value: str) -> str:
@@ -113,7 +121,7 @@ def declared(entry: BibEntry) -> list[WorkId]:
     """
     out: list[WorkId] = []
     doi = entry.fields.get("doi", "").strip()
-    if doi and (_DOI_BARE.match(doi) or doi.startswith("10.")):
+    if is_doi(doi):
         # arXiv mints its own DOIs under 10.48550, so such a DOI names a preprint and not a published article; normalising it means one artifact has one directory however the bibliography recorded it
         if m := _ARXIV_DOI.match(doi):
             out.append(WorkId("arxiv", m.group(1), "declared"))

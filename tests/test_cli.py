@@ -81,3 +81,47 @@ def test_bib_refuses_an_identifier_the_corpus_does_not_hold(runner: CliRunner, s
     result = runner.invoke(main, ["bib", "arxiv:9999.99999", "--corpus", str(synthetic)])
     assert result.exit_code == 1
     assert "not a work of this corpus" in result.output
+
+
+def test_extract_reports_what_it_found(runner: CliRunner, synthetic: Path) -> None:
+    made = runner.invoke(main, ["extract", "--json", "--corpus", str(synthetic)])
+    assert made.exit_code == 0, made.output
+    report = json.loads(made.stdout)
+    assert (report["extracted"], report["results"], report["proofs"]) == (3, 7, "verbatim")
+    assert report["proofs_kept"] == 7
+    assert {o["numbering"] for o in report["outcomes"]} == {"emulated"}
+
+    again = runner.invoke(main, ["extract", "--corpus", str(synthetic)])
+    assert again.exit_code == 0
+    assert "already extracted" in again.stdout
+
+    redone = runner.invoke(main, ["extract", "--all", "--json", "--corpus", str(synthetic)])
+    assert json.loads(redone.stdout)["extracted"] == 3
+
+
+def test_extract_one_work_without_its_proofs(runner: CliRunner, synthetic: Path) -> None:
+    made = runner.invoke(
+        main, ["extract", "arxiv:2401.00002", "--proofs", "none", "--json", "--corpus", str(synthetic)]
+    )
+    assert made.exit_code == 0, made.output
+    report = json.loads(made.stdout)
+    assert [o["version"] for o in report["outcomes"]] == ["arxiv:2401.00002v1"]
+    assert report["proofs_kept"] == 0
+    assert "\\begin{proof}" not in (synthetic / "works/arxiv/2401.00002/v1/digest.tex").read_text(encoding="utf-8")
+
+
+def test_extract_then_rebuild_indexes_the_results(runner: CliRunner, synthetic: Path) -> None:
+    runner.invoke(main, ["extract", "--corpus", str(synthetic)])
+    counted = runner.invoke(main, ["index", "rebuild", "--json", "--corpus", str(synthetic)])
+    assert json.loads(counted.stdout) == {**SYNTHETIC, "results": 7}
+
+
+def test_extract_says_so_when_a_corpus_has_nothing_to_read(runner: CliRunner, tmp_path: Path) -> None:
+    fresh = tmp_path / "empty"
+    runner.invoke(main, ["init", str(fresh)])
+    (fresh / "weft.toml").write_text(
+        (fresh / "weft.toml").read_text(encoding="utf-8").replace("works = []", 'works = ["arxiv:1"]'), encoding="utf-8"
+    )
+    made = runner.invoke(main, ["extract", "--corpus", str(fresh)])
+    assert made.exit_code == 0
+    assert "Nothing to extract" in made.stdout

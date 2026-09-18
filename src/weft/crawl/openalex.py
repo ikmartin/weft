@@ -12,6 +12,7 @@ from typing import Any
 
 from weft.crawl.net import NotFound, Service
 from weft.crawl.work import norm
+from weft.identity import is_doi
 
 BASE = "https://api.openalex.org/works"
 BATCH = 50
@@ -36,7 +37,11 @@ def parse(w: dict[str, Any]) -> OaRecord:
     """One OpenAlex work as a record; an arXiv location becomes an `arxiv:` identifier."""
     ids: list[str] = []
     if w.get("doi"):
-        ids.append(norm("doi:" + str(w["doi"])))
+        # an arXiv DOI normalises to an `arxiv:` identifier, which is not the shape being checked
+        ident = norm("doi:" + str(w["doi"]))
+        scheme, _, value = ident.partition(":")
+        if scheme != "doi" or is_doi(value):
+            ids.append(ident)
     arxiv = ""
     for loc in [w.get("best_oa_location") or {}, *(w.get("locations") or [])]:
         for url in (loc.get("landing_page_url"), loc.get("pdf_url")):

@@ -12,10 +12,21 @@ from typing import Any
 
 from weft.crawl.net import NotFound, Service
 from weft.crawl.work import Reference, norm
+from weft.identity import is_doi
 from weft.lookup import STRONG, Query, _plain, _surname, score
 
 BASE = "https://api.zbmath.org/v1/document"
 _ZBL = re.compile(r"^\d{4}\.\d{5}$")
+_RESTRICTED = "zbmath open web interface contents unavailable"
+
+
+def shown(value: object) -> str:
+    """A field zbMATH answered, or `""` where it answered with its restricted-content notice instead.
+
+    A record whose licence forbids redistribution comes back with the sentence "zbMATH Open Web Interface contents unavailable due to conflicting licenses." in every text field, identifiers included. Kept, it becomes a work's title, an author's name and -- until `is_doi` -- a DOI that merged every restricted record into one. Absent is the truth: zbMATH declined to say.
+    """
+    text = str(value or "").strip()
+    return "" if _RESTRICTED in text.lower() else text
 
 
 @dataclass
@@ -41,22 +52,22 @@ def parse(r: dict[str, Any]) -> ZbRecord:
     elif ident.lower().startswith("arxiv:"):
         ids.append("arxiv:" + ident.split(":", 1)[1])
     for link in r.get("links") or []:
-        if link.get("type") == "doi" and link.get("identifier"):
+        if link.get("type") == "doi" and is_doi(link.get("identifier")):
             ids.append(f"doi:{link['identifier']}")
         if link.get("type") == "arxiv" and link.get("identifier"):
             ids.append(f"arxiv:{link['identifier']}")
     t = r.get("title")
-    title = str(t.get("title") or "") if isinstance(t, dict) else str(t or "")
-    original = str(t.get("original") or "") if isinstance(t, dict) else ""
+    title = shown(t.get("title")) if isinstance(t, dict) else shown(t)
+    original = shown(t.get("original")) if isinstance(t, dict) else ""
     year = str(r.get("year") or "")[:4]
     refs: list[Reference] = []
     for ref in r.get("references") or []:
         zb = ref.get("zbmath") or {}
-        doi = ref.get("doi")
+        doi = ref.get("doi") if is_doi(ref.get("doi")) else None
         refs.append(
             Reference(
                 work=f"doi:{doi}" if doi else "",
-                text=(ref.get("text") or "").strip(),
+                text=shown(ref.get("text")),
                 identified_by="index" if doi else "",
                 zbmath=zb.get("document_id") or None,
                 msc=list(zb.get("msc") or []),
@@ -67,7 +78,7 @@ def parse(r: dict[str, Any]) -> ZbRecord:
         ids=ids,
         title=title,
         original=original,
-        authors=[a.get("name", "") for a in (r.get("contributors") or {}).get("authors", [])],
+        authors=[n for a in (r.get("contributors") or {}).get("authors", []) if (n := shown(a.get("name")))],
         year=int(year) if year.isdigit() else None,
         msc=[m["code"] for m in r.get("msc") or [] if m.get("code")],
         references=refs,
