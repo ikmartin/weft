@@ -1,6 +1,6 @@
 """Getting the bytes: an arXiv e-print or an open PDF, and unpacking what arrives.
 
-Downloads pass the same host budget as every metadata request, so a fetch and a plan running together cannot make arXiv throttle weft's client. A 406 or a 429 under load is retried after a pause, since arXiv answers a burst that way and the work is still there a moment later.
+Downloads pass the same host budget as every metadata request, so a fetch and a plan running together ask a service at the rate one of them intended. A 429 or a 5xx is retried after a pause; a 406 is not, because the one refusal weft has actually seen from arXiv was `arxiv.org` declining what `export.arxiv.org` serves, and asking the same host again cannot fix that.
 """
 
 from __future__ import annotations
@@ -16,10 +16,10 @@ from pathlib import Path
 from weft.crawl.net import BUDGET, USER_AGENT, HostBudget
 
 # HTTP codes that mean "too fast" or "try again", as opposed to "no such thing"
-# 500s and 429 are worth another ask; a 406 from arXiv means it is throttling this client, and asking again sooner only earns another.
+# 500s and 429 are worth another ask; a 406 is not, because it has never once meant rate (see the module docstring).
 _RETRY = (429, 500, 502, 503)
-# Seconds between bulk downloads of one host, beyond what its metadata queries take: arXiv refuses e-prints asked for every three seconds.
-BULK_SPACING = 15.0
+# Seconds between bulk downloads of one host, beyond what its metadata queries take. arXiv asks for one request every three seconds and means it: 35 e-print PDFs in a row at this spacing, no refusal, 2.9s a request (2026-09-18). An earlier 15.0 was chosen when a wrong-host refusal was read as throttling, and it cost a fivefold slowdown for nothing.
+BULK_SPACING = 3.0
 
 
 class DownloadRefused(Exception):

@@ -108,7 +108,7 @@ Each step reads what the one before it wrote and writes files; each is resumable
 
 ### 3.1 Asking services politely
 
-Every request goes through one `Service`, so the spacing, the cache and the transport are the same everywhere. Per host, seconds between requests: `arxiv.org` and `export.arxiv.org` 3.0, `api.zbmath.org` 1.0, `api.crossref.org` 1.0, `api.openalex.org` 0.2, anything else 1.0. Bulk downloads take a further 15 seconds (`download.BULK_SPACING`).
+Every request goes through one `Service`, so the spacing, the cache and the transport are the same everywhere. Per host, seconds between requests: `arxiv.org` and `export.arxiv.org` 3.0, `api.zbmath.org` 1.0, `api.crossref.org` 1.0, `api.openalex.org` 0.2, anything else 1.0. Bulk downloads take no more than the host's own spacing (`download.BULK_SPACING`, 3.0): 35 e-print PDFs in a row at that rate drew no refusal.
 
 The budget is **shared between processes**: the last request per host is recorded under `$WEFT_STATE_DIR`, else `$XDG_CACHE_HOME/weft/hosts`, else `~/.cache/weft/hosts`, because a service throttles a client and two processes are one client. `WEFT_STATE_DIR=` empty turns sharing off, which is what the tests do. `WEFT_OFFLINE_RESPONSES` names a directory of recorded answers; when it is set the default transport makes no request at all, which is why no test touches the network.
 
