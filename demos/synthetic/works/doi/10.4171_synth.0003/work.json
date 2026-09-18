@@ -1,0 +1,42 @@
+{
+  "arxiv_category": "",
+  "authors": [
+    "Ibarra, Juno"
+  ],
+  "citekeys": [
+    "third"
+  ],
+  "depth": 2,
+  "download": {},
+  "home": "doi/10.4171_synth.0003",
+  "ids": [
+    "doi:10.4171/synth.0003"
+  ],
+  "key": "doi:10.4171/synth.0003",
+  "licence": "",
+  "msc": [
+    "14D07"
+  ],
+  "open_pdf": "",
+  "provenance": "resolved",
+  "reached_by": "lookup",
+  "reached_from": [
+    "arxiv:2401.00001",
+    "arxiv:2401.00002"
+  ],
+  "record": 1,
+  "references": [],
+  "references_known": false,
+  "title": "Foundations of the synthetic period map",
+  "versions": [
+    {
+      "extracted_at": "",
+      "has_pdf": false,
+      "has_source": false,
+      "id": "doi:10.4171/synth.0003",
+      "method": "",
+      "numbering": ""
+    }
+  ],
+  "year": "1998"
+}

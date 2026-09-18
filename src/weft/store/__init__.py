@@ -1,0 +1,61 @@
+"""The index: a queryable view of the corpus, derived from the files under `works/` and rebuildable from them.
+
+One interface, so the corpus can outgrow a file without the domain model learning any SQL. `open_store(settings)` picks an implementation from the dsn.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Iterable, Iterator
+from typing import Protocol
+
+from weft.config import Settings
+from weft.model import Edge, Reference, Result, SameAs, Version, Work
+
+
+class Store(Protocol):
+    """Everything weft asks of an index. Writes are upserts, so a rebuild is a replay of the files."""
+
+    def upsert_works(self, works: Iterable[Work]) -> int: ...
+
+    def upsert_versions(self, versions: Iterable[Version]) -> int: ...
+
+    def upsert_results(self, results: Iterable[Result]) -> int: ...
+
+    def upsert_edges(self, edges: Iterable[Edge]) -> int: ...
+
+    def upsert_references(self, references: Iterable[Reference]) -> int: ...
+
+    def upsert_same_as(self, pairs: Iterable[SameAs]) -> int: ...
+
+    def work(self, key: str) -> Work | None: ...
+
+    def works(self, *, depth: int | None = None) -> Iterator[Work]: ...
+
+    def versions_of(self, work: str) -> Iterator[Version]: ...
+
+    def result(self, key: str) -> Result | None: ...
+
+    def results_of(self, version: str) -> Iterator[Result]: ...
+
+    def edges_from(self, key: str) -> Iterator[Edge]: ...
+
+    def edges_to(self, key: str) -> Iterator[Edge]: ...
+
+    def references_of(self, version: str) -> Iterator[Reference]: ...
+
+    def search_works(self, text: str, *, limit: int = 50) -> Iterator[Work]: ...
+
+    def counts(self) -> dict[str, int]: ...
+
+    def clear(self) -> None: ...
+
+    def close(self) -> None: ...
+
+
+def open_store(settings: Settings) -> Store:
+    """The index named by the dsn. Only sqlite is implemented; a Postgres dsn is refused with the reason."""
+    if settings.dsn.startswith("sqlite:"):
+        from weft.store.sqlite import SqliteStore
+
+        return SqliteStore(settings.index_path)
+    raise NotImplementedError(f"no store for dsn {settings.dsn!r}; sqlite: is the only one implemented")

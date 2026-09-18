@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+.venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+dist/
+*.egg-info/
+.DS_Store
+
+# Corpora hold other people's papers, verbatim, and their bytes. Nothing crawled is committed.
+demos/acgs/
+demos/relloc/
+demos/*/works/
+demos/*/cache/
+demos/*/crawl/
+demos/*/exports/
+demos/*/index.sqlite*
+!demos/synthetic/works/

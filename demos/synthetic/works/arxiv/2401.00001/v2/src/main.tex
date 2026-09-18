@@ -1,0 +1,36 @@
+\documentclass{article}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+
+\title{Tropical cycles on fans of valuated matroids}
+\author{B. Aurelio \and D. Cerny}
+
+\begin{document}
+\maketitle
+
+\section{Statements}
+
+\begin{theorem}\label{thm:main}
+Let $M$ be a valuated matroid of rank $r$ on a finite ground set $E$. Then the tropical cycle $Z(M)$ is balanced and its recession fan is the Bergman fan of the underlying matroid.
+\end{theorem}
+
+\begin{proof}
+Balancing is local at a codimension-one cone, so it is enough to check one wall. By \cite[Theorem 2.1]{other} the weighted count across a wall of $Z(M)$ agrees with the local degree of the associated stable map, and that count vanishes exactly when the wall is interior. The identification of the recession fan is then the computation of \cite{third}.
+\end{proof}
+
+\section{Consequences}
+
+\begin{proposition}\label{prop:degree}
+The degree of $Z(M)$ equals the number of bases of $M$ of minimal valuation.
+\end{proposition}
+
+\begin{proof}
+Intersect with a generic translate of the standard hyperplane; connectivity in codimension one is now immediate from Theorem~\ref{thm:main} and the lemma of the first version is not needed.
+\end{proof}
+
+\begin{thebibliography}{9}
+\bibitem{other} F. Ekstrom and H. Gallant, \emph{A vanishing theorem for weighted stable curves}, preprint, 2024, arXiv:2401.00002.
+\bibitem{third} J. Ibarra, \emph{Foundations of the synthetic period map}, Lecture notes, 1998.
+\end{thebibliography}
+
+\end{document}

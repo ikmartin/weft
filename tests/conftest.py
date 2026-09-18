@@ -1,0 +1,28 @@
+"""Fixtures every test module may ask for. Helpers that are imported rather than injected live in `support.py`."""
+
+from __future__ import annotations
+
+import importlib.util
+from pathlib import Path
+from typing import Any
+
+import pytest
+
+REPO = Path(__file__).resolve().parents[1]
+
+
+def _generator() -> Any:
+    """The synthetic corpus's generator, loaded from scripts/ so a test never reads the committed copy."""
+    spec = importlib.util.spec_from_file_location("make_synthetic", REPO / "scripts" / "make_synthetic.py")
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+@pytest.fixture
+def synthetic(tmp_path: Path) -> Path:
+    """A freshly generated synthetic corpus, writable, so a test may edit or delete its files."""
+    dest = tmp_path / "synthetic"
+    _generator().write_corpus(dest)
+    return dest

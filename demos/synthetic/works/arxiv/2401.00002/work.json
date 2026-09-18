@@ -1,0 +1,60 @@
+{
+  "arxiv_category": "math.AG",
+  "authors": [
+    "Ekstrom, Fenna",
+    "Gallant, Hollis"
+  ],
+  "citekeys": [
+    "other"
+  ],
+  "depth": 1,
+  "download": {
+    "at": "2026-09-17T12:00:00Z",
+    "bytes": 1240,
+    "from": "https://example.invalid/synthetic/2401.00002v1",
+    "kind": "source"
+  },
+  "home": "arxiv/2401.00002",
+  "ids": [
+    "arxiv:2401.00002"
+  ],
+  "key": "arxiv:2401.00002",
+  "licence": "arXiv non-exclusive",
+  "msc": [
+    "14N35"
+  ],
+  "open_pdf": "",
+  "provenance": "declared",
+  "reached_by": "declared",
+  "reached_from": [
+    "arxiv:2401.00001"
+  ],
+  "record": 1,
+  "references": [
+    {
+      "citekey": "other",
+      "identified_by": "declared",
+      "text": "B. Aurelio and D. Cerny, Tropical cycles on fans of valuated matroids, preprint, 2024, arXiv:2401.00001.",
+      "work": "arxiv:2401.00001"
+    },
+    {
+      "citekey": "third",
+      "identified_by": "lookup",
+      "text": "J. Ibarra, Foundations of the synthetic period map, Lecture notes, 1998.",
+      "work": "doi:10.4171/synth.0003"
+    }
+  ],
+  "references_known": true,
+  "title": "A vanishing theorem for weighted stable curves",
+  "versions": [
+    {
+      "extracted_at": "",
+      "has_pdf": false,
+      "has_source": true,
+      "id": "arxiv:2401.00002v1",
+      "method": "",
+      "numbering": ""
+    }
+  ],
+  "year": "2024"
+}

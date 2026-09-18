@@ -1,0 +1,36 @@
+\documentclass{article}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}[theorem]{Corollary}
+
+\title{A vanishing theorem for weighted stable curves}
+\author{F. Ekstrom \and H. Gallant}
+
+\begin{document}
+\maketitle
+
+\section{The vanishing}
+
+\begin{theorem}\label{thm:vanish}
+Let $C$ be a weighted stable curve of genus $g$ with weights summing to less than one. Then $H^1(C, \omega_C) = 0$.
+\end{theorem}
+
+\begin{proof}
+The weight condition forces every component to be rational, so the dualising sheaf is a sum of line bundles of negative degree. The vanishing for each summand is the local computation of \cite[Theorem 2.1]{other}, and the compatibility of the two normalisations is the point of \cite{third}.
+\end{proof}
+
+\section{A consequence}
+
+\begin{corollary}\label{cor:rigid}
+Such a curve admits no infinitesimal automorphism.
+\end{corollary}
+
+\begin{proof}
+Immediate from Theorem~\ref{thm:vanish} and Serre duality.
+\end{proof}
+
+\begin{thebibliography}{9}
+\bibitem{other} B. Aurelio and D. Cerny, \emph{Tropical cycles on fans of valuated matroids}, preprint, 2024, arXiv:2401.00001.
+\bibitem{third} J. Ibarra, \emph{Foundations of the synthetic period map}, Lecture notes, 1998.
+\end{thebibliography}
+
+\end{document}

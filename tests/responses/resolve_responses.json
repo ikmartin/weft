@@ -1,0 +1,122 @@
+{
+ "_source": "Recorded from zbMATH Open (api.zbmath.org, CC-BY-SA 4.0) and Crossref (api.crossref.org) on 2026-09-17, trimmed to the fields loom reads.",
+ "zbmath_edidin_graham": {
+  "result": [
+   {
+    "identifier": "0980.14004",
+    "title": {
+     "addition": null,
+     "original": null,
+     "subtitle": null,
+     "title": "Localization in equivariant intersection theory and the Bott residue formula"
+    },
+    "year": "1998",
+    "contributors": {
+     "authors": [
+      {
+       "name": "Edidin, Dan"
+      },
+      {
+       "name": "Graham, William"
+      }
+     ]
+    },
+    "links": [
+     {
+      "type": "doi",
+      "identifier": "10.1353/ajm.1998.0020"
+     },
+     {
+      "type": "arxiv",
+      "identifier": "alg-geom/9508001"
+     }
+    ]
+   }
+  ]
+ },
+ "zbmath_silverman": {
+  "result": [
+   {
+    "identifier": "0911.14015",
+    "title": {
+     "addition": null,
+     "original": null,
+     "subtitle": null,
+     "title": "Advanced topics in the arithmetic of elliptic curves"
+    },
+    "year": "1994",
+    "contributors": {
+     "authors": [
+      {
+       "name": "Silverman, Joseph H."
+      }
+     ]
+    },
+    "links": []
+   }
+  ]
+ },
+ "crossref_silverman": {
+  "message": {
+   "items": [
+    {
+     "DOI": "10.1007/978-1-4612-0851-8_6",
+     "title": [
+      "Elliptic Curves over Complete Fields"
+     ],
+     "author": [
+      {
+       "given": "Joseph H.",
+       "family": "Silverman"
+      }
+     ],
+     "issued": {
+      "date-parts": [
+       [
+        1994
+       ]
+      ]
+     }
+    },
+    {
+     "DOI": "10.1007/978-1-4612-0851-8",
+     "title": [
+      "Advanced Topics in the Arithmetic of Elliptic Curves"
+     ],
+     "author": [
+      {
+       "given": "Joseph H.",
+       "family": "Silverman"
+      }
+     ],
+     "issued": {
+      "date-parts": [
+       [
+        1994
+       ]
+      ]
+     }
+    },
+    {
+     "DOI": "10.1007/978-1-4612-0851-8_4",
+     "title": [
+      "Elliptic Surfaces"
+     ],
+     "author": [
+      {
+       "given": "Joseph H.",
+       "family": "Silverman"
+      }
+     ],
+     "issued": {
+      "date-parts": [
+       [
+        1994
+       ]
+      ]
+     }
+    }
+   ]
+  }
+ }
+}
