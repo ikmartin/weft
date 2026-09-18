@@ -89,7 +89,7 @@ contact = ""                  # an address for Crossref's polite pool; a propert
 [store]
 dsn = "sqlite:index.sqlite"
 [licence]
-share = false                 # statements and proofs are verbatim third-party text
+share = false                 # the posture, not enforcement: a gallery is private and nothing exports (10.7)
 [expand]
 subjects = ["14N", "14D"]     # the default frontier filter; a run may override it
 categories = ["math.AG"]      # for works with no MSC code
@@ -295,7 +295,9 @@ Once `[crawl]` has left the config (§3), the `crawl` group has nothing left to 
 
 **[open, 10.6] Sync with a quilt's reference layer.** Not to be designed before both exist.
 
-**[open, 10.7] Licensing posture, and the order it is decided in.** Statements are verbatim third-party text and `pages/` is a much larger verbatim copy: deterministic page text for every PDF in the gallery. `[licence] share` is a recorded posture today. Building the copying before deciding the posture is the sequencing risk; at minimum, decide before anything exports or shares a gallery.
+**[resolved, was 10.7] Licensing.** Deferred in full, with the assumption written down: **a gallery is private, on one researcher's own machine, read by that researcher and their agent, and never shared.** Under that posture licences do not arise — this is the fetching and reading a person already does, and the gallery is a filing cabinet for it. So no licence is recorded, no licence gates anything, and `[licence] share = false` stays in the config as the *statement* of the posture rather than as enforcement.
+
+The invariant that keeps this honest: **no export or sharing path is built while `share` is false** (§11). The day a gallery is meant to leave the machine, this question comes back, and it comes back before the feature does — at which point §3.3's anchors are already the answer to most of it, because `{sha256, page, quad}` names a passage without reproducing it, and the graph weft exists to build is facts rather than expression.
 
 **[open, 10.8] Vector search.** In `find` as a third mode, as a candidate generator only. Worth building once exact and fuzzy have been shown insufficient on a real gallery, not before.
 
@@ -311,8 +313,12 @@ Once `[crawl]` has left the config (§3), the `crawl` group has nothing left to 
 
 **[resolved, was 10.14] The bulk spacing.** Measured: 35 PDFs at 3.0 seconds, no refusal, 2.9 seconds a request. `BULK_SPACING` is 3.0, and fetching is five times faster than the day began.
 
+**[open, 10.16] weft's HTTP client refuses to be served by arXiv.** Measured 2026-09-18 against `oaipmh.arxiv.org/oai`, one URL, one User-Agent, one minute: `urllib` — which is weft's transport everywhere — gets **406**, while `curl` and `httpx` over HTTP/1.1 both get **200**. So the e-print refusals of 2026-09-17 were not fixed by moving to `export.arxiv.org`; they were routed around, and the download paths of that host happen not to apply whatever rule this is. The discriminator is unidentified and is not the User-Agent, the `Accept` headers, the encoding or the HTTP version, all of which were tested. What this costs: arXiv's OAI-PMH interface is unreachable, and that is where a paper's licence, its version history and its dates live — the last of which is an open item from M1, since an arXiv id without a version names "the latest" and weft records the id it was given. The remedy is a different HTTP client, which is a small change to `crawl/net.py` and `crawl/download.py` and would remove the class rather than the instance.
+
 **[open, 10.15] Scoping by a stored predicate** rather than by a past haul, and a hand-listed set chosen by taste (§9). Neither is built until something demands it.
 
 ## 11. What this plan does not build
 
-Stored relevance scores; global PageRank; digests of digests; agent-authored prose summaries; auto-accepted single-signal matches; a background fetcher; a level-2 claim for a work whose internal graph does not exist; partial LaTeX extraction; **a ranking, a budget, a queue or a person's confirmation for anything a machine can derive** (§2.1); any store whose deletion would cost a paper anything.
+Stored relevance scores; global PageRank; digests of digests; agent-authored prose summaries; auto-accepted single-signal matches; a background fetcher; a level-2 claim for a work whose internal graph does not exist; partial LaTeX extraction; **a ranking, a budget, a queue or a person's confirmation for anything a machine can derive** (§2.1); **any path by which a gallery leaves the machine it was built on** — no export, no publishing, no hosted view, no gallery handed to a collaborator, while `[licence] share` is false (10.7); any store whose deletion would cost a paper anything.
+
+A local artifact is not sharing. An arras projection (10.13) rendered and read on the same machine is the researcher reading their own library in a nicer window, and it stays in scope.
