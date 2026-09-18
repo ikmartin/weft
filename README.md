@@ -4,6 +4,8 @@ A machine-readable library of mathematical results: crawl a citation network to 
 
 Named for the crosswise threads drawn through the warp: the papers are the warp, the links between their results are the weft.
 
+- [docs/weft.md](docs/weft.md) — what is built, as built: the corpus on disk, the pipeline, the surfaces and the contracts.
+- [docs/cli-reference.md](docs/cli-reference.md) — every command, generated from the command tree.
 - [docs/plan-0.1-weft.md](docs/plan-0.1-weft.md) — what weft is, its data model, the crawl, the edges it draws, and the milestones.
 - [docs/weft-and-loom.md](docs/weft-and-loom.md) — the boundary with [loom](https://github.com/ikmartin/loom), the seam between them, and what loom gives up.
 
